@@ -112,7 +112,7 @@ export class EcsMoodleStack extends cdk.Stack {
             performanceMode: efs.PerformanceMode.GENERAL_PURPOSE,
             throughputMode: efs.ThroughputMode.ELASTIC,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
-            enableAutomaticBackups: true,
+            enableAutomaticBackups: false,
             securityGroup: efsSecurityGroup
         });
         const moodleEfsAccessPoint = moodleEfs.addAccessPoint('moodle-efs-access-point', {
@@ -130,24 +130,24 @@ export class EcsMoodleStack extends cdk.Stack {
             subnetIds: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }).subnetIds
         });
 
-        const moodleRedis = new elasticache.CfnReplicationGroup(this, 'moodle-redis', {
-            replicationGroupDescription: 'Moodle Redis',
-            cacheNodeType: "cache.t3.micro",
-            engine: 'redis',
-            numCacheClusters: 2,
-            multiAzEnabled: true,
-            automaticFailoverEnabled: true,
-            autoMinorVersionUpgrade: true,
-            cacheSubnetGroupName: `${cdk.Names.uniqueId(this)}-redis-subnet-group`,
-            securityGroupIds: [ redisSG.securityGroupId ],
-            atRestEncryptionEnabled: true,
-        });
-        moodleRedis.addDependency(redisSubnetGroup);
+        // const moodleRedis = new elasticache.CfnReplicationGroup(this, 'moodle-redis', {
+        //     replicationGroupDescription: 'Moodle Redis',
+        //     cacheNodeType: "cache.t3.micro",
+        //     engine: 'redis',
+        //     numCacheClusters: 2,
+        //     multiAzEnabled: true,
+        //     automaticFailoverEnabled: true,
+        //     autoMinorVersionUpgrade: true,
+        //     cacheSubnetGroupName: `${cdk.Names.uniqueId(this)}-redis-subnet-group`,
+        //     securityGroupIds: [ redisSG.securityGroupId ],
+        //     atRestEncryptionEnabled: true,
+        // });
+        // moodleRedis.addDependency(redisSubnetGroup);
 
         // Moodle ECS Task Definition
         const moodleTaskDefinition = new ecs.FargateTaskDefinition(this, 'moodle-task-def', {
-            cpu: 2048,
-            memoryLimitMiB: 4096
+            cpu: 512,
+            memoryLimitMiB: 1024
         });
         moodleTaskDefinition.addToExecutionRolePolicy(iam.PolicyStatement.fromJson({
             "Effect": "Allow",
@@ -365,9 +365,9 @@ export class EcsMoodleStack extends cdk.Stack {
         new cdk.CfnOutput(this, 'MOODLE-PASSWORD-SECRET-ARN', {
             value: moodlePasswordSecret.secretArn
         });
-        new cdk.CfnOutput(this, 'MOODLE-REDIS-PRIMARY-ENDPOINT-ADDRESS-AND-PORT', {
-            value: `${moodleRedis.attrPrimaryEndPointAddress}:${moodleRedis.attrPrimaryEndPointPort}`
-        });
+        // new cdk.CfnOutput(this, 'MOODLE-REDIS-PRIMARY-ENDPOINT-ADDRESS-AND-PORT', {
+        //     value: `${moodleRedis.attrPrimaryEndPointAddress}:${moodleRedis.attrPrimaryEndPointPort}`
+        // });
         new cdk.CfnOutput(this, 'ECS-CLUSTER-NAME', {
             value: cluster.clusterName
         });
