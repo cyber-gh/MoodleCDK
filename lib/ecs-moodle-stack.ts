@@ -52,7 +52,8 @@ export class EcsMoodleStack extends cdk.Stack {
                 'flowlog-to-cloudwatch': {
                     trafficType: ec2.FlowLogTrafficType.ALL
                 }
-            }
+            },
+            natGateways: 0
         });
         // Amazon ECS tasks hosted on Fargate using platform version 1.4.0 or later require both Amazon ECR VPC endpoints and the Amazon S3 gateway endpoints.
         // Reference: https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html#ecr-setting-up-vpc-create
