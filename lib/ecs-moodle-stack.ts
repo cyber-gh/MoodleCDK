@@ -53,7 +53,7 @@ export class EcsMoodleStack extends cdk.Stack {
                     trafficType: ec2.FlowLogTrafficType.ALL
                 }
             },
-            natGateways: 0
+            natGateways: 1
         });
         // Amazon ECS tasks hosted on Fargate using platform version 1.4.0 or later require both Amazon ECR VPC endpoints and the Amazon S3 gateway endpoints.
         // Reference: https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html#ecr-setting-up-vpc-create
@@ -194,7 +194,7 @@ export class EcsMoodleStack extends cdk.Stack {
         const moodleContainerDefinition = moodleTaskDefinition.addContainer('moodle-container', {
             containerName: 'moodle',
             image: ContainerImage.fromEcrRepository(moodleEcrRepo),
-            memoryLimitMiB: 4096,
+            memoryLimitMiB: 1024,
             portMappings: [{ containerPort: 8080 }],
             stopTimeout: cdk.Duration.seconds(120),
             environment: {
